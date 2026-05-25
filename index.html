@@ -57,7 +57,8 @@
                 <span id="m-theme-txt" class="text-xs font-bold uppercase tracking-widest font-black">Theme</span>
                 <span class="material-symbols-outlined text-yellow-400" id="theme-icon">light_mode</span>
             </button>
-            <button onclick="location.reload()" class="w-full flex items-center gap-4 p-4 text-red-300 bg-red-500/10 rounded-2xl">
+            <!-- UPDATED LOGOUT BUTTON -->
+            <button onclick="handleLogout()" class="w-full flex items-center gap-4 p-4 text-red-300 bg-red-500/10 rounded-2xl">
                 <span class="material-symbols-outlined">logout</span><span class="font-bold uppercase text-xs">Logout Account</span>
             </button>
         </div>
@@ -74,7 +75,7 @@
         </div>
     </section>
 
-    <!-- 2. LANGUAGE PAGE (Separate) -->
+    <!-- 2. LANGUAGE PAGE -->
     <section id="scr-lang" class="screen bg-slate-50 dark:bg-slate-950 p-8 flex items-center justify-center">
         <div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl w-full max-w-sm text-center border dark:border-slate-800">
             <h2 class="text-2xl font-black mb-6 text-brand dark:text-blue-400 uppercase tracking-tighter italic">Select Language</h2>
@@ -99,13 +100,11 @@
         </div>
     </section>
 
-    <!-- RESIDENT DASHBOARD -->
+    <!-- DASHBOARD SCREENS REMAIN THE SAME -->
     <section id="scr-res-dash" class="screen">
         <div class="header-slot"></div>
         <div class="p-6 pb-24 space-y-6 overflow-y-auto">
             <h2 class="text-2xl font-black italic tracking-tighter text-slate-800 dark:text-white"><span id="d-hi">Hi</span>, <span id="res-name-h" class="text-brand dark:text-blue-400 italic">--</span></h2>
-            
-            <!-- FEE CARD -->
             <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border dark:border-slate-800">
                 <div class="flex justify-between items-center mb-6">
                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest" id="d-maint-label">Your Maintenance</p>
@@ -114,39 +113,28 @@
                 <h3 id="res-fee-h" class="text-4xl font-black text-brand dark:text-blue-400 mb-8 tracking-tighter italic">₹0.00</h3>
                 <button id="pay-btn" onclick="document.getElementById('pay-modal').classList.remove('hidden')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Pay Now</button>
             </div>
-
-            <!-- ANNOUNCEMENTS (NEW REQUESTED SECTION) -->
-            <div class="space-y-4">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest" id="d-ann-label">Notices</h3>
-                <div id="res-ann-list" class="space-y-3"></div>
-            </div>
-
+            <div class="space-y-4"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest" id="d-ann-label">Notices</h3><div id="res-ann-list" class="space-y-3"></div></div>
             <div id="stat-counts" class="grid grid-cols-2 gap-3"></div>
-            <div class="building-finance-component"></div>
+            <div id="finance-card" class="building-finance-component"></div>
             <div class="space-y-4"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest" id="d-exp-label">Expenditures</h3><div id="res-exp-list" class="space-y-3"></div></div>
         </div>
     </section>
 
-    <!-- ADMIN DASHBOARD -->
     <section id="scr-admin-dash" class="screen">
         <div class="header-slot"></div>
         <div class="p-6 pb-24 space-y-6 overflow-y-auto">
             <h2 class="text-xl font-black uppercase tracking-widest italic text-slate-500">Admin Control Panel</h2>
             <div id="admin-finance-card"></div>
-            
-            <!-- ADMIN BALANCE ADDER WITH NOTE -->
             <div class="bg-emerald-50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800 space-y-4 shadow-sm">
                 <h3 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2 font-black uppercase"><span class="material-symbols-outlined text-sm">savings</span> Update Cloud Balance</h3>
                 <input type="number" id="adm-adj-amt" placeholder="Amount" class="w-full p-4 rounded-xl dark:bg-slate-800 border-none font-bold outline-none text-sm shadow-inner">
-                <input type="text" id="adm-adj-note" placeholder="Add Note (e.g. Month Carry Forward)" class="w-full p-3 rounded-xl dark:bg-slate-800 border-none font-bold text-[9px] outline-none shadow-inner uppercase opacity-50">
+                <input type="text" id="adm-adj-note" placeholder="Add Note" class="w-full p-3 rounded-xl dark:bg-slate-800 border-none font-bold text-[9px] outline-none shadow-inner uppercase opacity-50">
                 <div class="flex gap-2">
                     <button onclick="adjBal('online')" class="flex-1 bg-brand text-white py-3 rounded-xl font-bold text-[9px] uppercase tracking-tighter">Add Bank</button>
                     <button onclick="adjBal('cash')" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold text-[9px] uppercase tracking-tighter">Add Cash</button>
                 </div>
             </div>
-
             <div id="admin-pending-list" class="space-y-4"></div>
-            
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="showScreen('scr-admin-res')" class="bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col items-center gap-2 shadow-sm"><span class="material-symbols-outlined text-blue-500 bg-blue-50 p-3 rounded-full font-bold">group</span><span class="text-[10px] font-black uppercase tracking-tighter italic">Neighbors</span></button>
                 <button onclick="showScreen('scr-admin-exp')" class="bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col items-center gap-2 shadow-sm"><span class="material-symbols-outlined text-red-500 bg-red-50 p-3 rounded-full font-bold">receipt_long</span><span class="text-[10px] font-black uppercase tracking-tighter">Expenses</span></button>
@@ -155,7 +143,8 @@
         </div>
     </section>
 
-    <!-- ADMIN RESIDENT MANAGEMENT -->
+    <!-- REMAINING PAGES (ADMIN RES, EXP, ANN, HISTORY, PROFILE, RECEIPT, PAY MODAL, TOAST, TEMPLATE) -->
+    <!-- [Keeping your exact HTML structure for all sections below...] -->
     <section id="scr-admin-res" class="screen bg-white dark:bg-slate-950">
         <header class="p-6 border-b dark:border-slate-800 flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs">Resident Maintenance</h1></header>
         <div class="p-6 space-y-6 overflow-y-auto pb-20">
@@ -171,19 +160,17 @@
         </div>
     </section>
 
-    <!-- ADMIN ANNOUNCEMENT TOOL -->
     <section id="scr-admin-ann" class="screen bg-white dark:bg-slate-950">
         <header class="p-6 border-b dark:border-slate-800 flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs tracking-tighter italic">Broadcast Notice</h1></header>
         <div class="p-6 space-y-6 overflow-y-auto pb-20">
             <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl space-y-4 border border-slate-200">
-                <textarea id="ann-txt-in" placeholder="Write notice (e.g. Unit Paid Maint)..." class="w-full p-4 rounded-xl border-none font-bold text-xs dark:bg-slate-800 h-24 outline-none"></textarea>
+                <textarea id="ann-txt-in" placeholder="Write notice..." class="w-full p-4 rounded-xl border-none font-bold text-xs dark:bg-slate-800 h-24 outline-none"></textarea>
                 <button onclick="postAnn()" class="w-full bg-brand text-white py-4 rounded-xl font-black text-xs uppercase shadow-lg tracking-widest">Publish for All</button>
             </div>
             <div id="admin-ann-list-full" class="space-y-3"></div>
         </div>
     </section>
 
-    <!-- OTHER SCREENS -->
     <section id="scr-admin-exp" class="screen bg-white dark:bg-slate-950">
         <header class="p-6 border-b dark:border-slate-800 flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs">Deduct Expenditure</h1></header>
         <div class="p-6 space-y-6 overflow-y-auto pb-20">
@@ -216,7 +203,6 @@
         </div>
     </section>
 
-    <!-- RECEIPT MODAL -->
     <div id="modal-receipt" class="fixed inset-0 bg-black/90 hidden z-[3000] flex flex-col items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center border-t-8 border-brand">
             <h1 class="font-black text-brand text-xl uppercase mb-1 tracking-tighter">Parimal Complex</h1>
@@ -233,7 +219,6 @@
         <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="mt-6 w-full max-w-sm bg-white/20 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">Close Receipt</button>
     </div>
 
-    <!-- MODALS -->
     <div id="pay-modal" class="fixed inset-0 bg-black/80 hidden z-[1000] flex items-end p-4 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-900 w-full max-w-md mx-auto rounded-t-[3rem] rounded-b-2xl p-8 space-y-6 shadow-2xl">
             <h3 class="text-xl font-black text-center text-brand dark:text-blue-400 italic tracking-widest">Select Mode</h3>
@@ -272,10 +257,22 @@
             gu: { hi: "નમસ્તે", maint: "જાળવણી ફી", exp: "બિલ્ડિંગ ખર્ચ", logout: "લોગઆઉટ", theme: "થીમ", pay: "ચુકવણી કરો", paid: "ચુકવેલ", pend: "બાકી સભ્યો", hist: "ઇતિહાસ", dash: "ડેશબોર્ડ", profile: "પ્રોફાઇલ", ann: "નોટિસ" }
         };
 
-        // --- 2. DATA SYNC ---
+        // --- 2. DATA SYNC & AUTO-LOGIN ---
         db.ref('Parimal_Prod_Final_v12').on('value', (snap) => {
             STATE = snap.val() || { cash: 0, online: 0, expenditures: [], announcements: [], residents: { "ADMIN": { pass: "123", isStaff: true, name: "Admin" } } };
             document.getElementById('loader').classList.add('hidden');
+            
+            // SESSION CHECK: If not logged in, check localStorage memory
+            if (!currentUser) {
+                const savedUid = localStorage.getItem('parimal_uid');
+                const savedRole = localStorage.getItem('parimal_role');
+                if (savedUid && (savedUid === "ADMIN" || (STATE.residents && STATE.residents[savedUid]))) {
+                    currentUser = savedUid;
+                    role = savedRole;
+                    showScreen(role === 'ADMIN' ? 'scr-admin-dash' : 'scr-res-dash');
+                }
+            }
+
             if(currentUser) renderUI();
         });
 
@@ -296,12 +293,33 @@
 
         function setLang(l) { lang = l; showScreen('scr-login'); }
 
+        // --- LOGIN & SESSION PERSISTENCE ---
         function handleLogin() {
             const id = document.getElementById('uid').value.toUpperCase();
             const p = document.getElementById('pass').value;
-            if(id === "ADMIN" && p === "123") { currentUser = "ADMIN"; role = "ADMIN"; showScreen('scr-admin-dash'); }
-            else if(STATE.residents[id] && STATE.residents[id].pass === p) { currentUser = id; role = "RESIDENT"; showScreen('scr-res-dash'); }
+            
+            if(id === "ADMIN" && p === "123") { 
+                currentUser = "ADMIN"; role = "ADMIN"; 
+                saveSession(id, role);
+                showScreen('scr-admin-dash'); 
+            }
+            else if(STATE.residents[id] && STATE.residents[id].pass === p) { 
+                currentUser = id; role = "RESIDENT"; 
+                saveSession(id, role);
+                showScreen('scr-res-dash'); 
+            }
             else { document.getElementById('modal-error').classList.remove('hidden'); }
+        }
+
+        function saveSession(uid, uRole) {
+            localStorage.setItem('parimal_uid', uid);
+            localStorage.setItem('parimal_role', uRole);
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('parimal_uid');
+            localStorage.removeItem('parimal_role');
+            location.reload(); // Restarts the app to login screen
         }
 
         function renderUI() {
@@ -312,7 +330,6 @@
             const curMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
             const paidCount = resKeys.filter(k => STATE.residents[k].lastPaidMonth === curMonth).length;
 
-            // MENU REFRESH
             const lnk = document.getElementById('menu-links');
             if(role === 'ADMIN') {
                 lnk.innerHTML = `<button onclick="showScreen('scr-admin-dash');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">dashboard</span><span class="font-bold font-black text-sm uppercase italic tracking-tighter">${d.dash}</span></button>`;
@@ -322,9 +339,8 @@
                 <button onclick="showScreen('scr-profile');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">person</span><span class="font-bold font-black tracking-tighter italic uppercase text-sm">${d.profile}</span></button>`;
             }
 
-            // Cards
             const finHTML = `<div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border dark:border-slate-800 relative overflow-hidden"><p class="text-[10px] font-black text-slate-400 uppercase mb-2 italic">Building Funds</p><h3 class="text-4xl font-black text-brand dark:text-blue-400 mb-8 italic tracking-tighter italic uppercase font-black tracking-tighter">₹${total.toLocaleString()}</h3><div class="grid grid-cols-2 gap-4 border-t dark:border-slate-800 pt-6"><div><p class="text-[8px] font-bold text-slate-300 uppercase italic tracking-tighter">Bank</p><p class="text-lg font-black text-brand dark:text-blue-300 italic tracking-tighter">₹${(STATE.online||0).toLocaleString()}</p></div><div class="border-l border-slate-100 dark:border-slate-800 pl-4"><p class="text-[8px] font-bold text-slate-300 uppercase italic tracking-tighter text-slate-400">Cash</p><p class="text-lg font-black text-slate-700 dark:text-slate-400 italic tracking-tighter">₹${(STATE.cash||0).toLocaleString()}</p></div></div></div>`;
-            document.querySelectorAll('#finance-card, #admin-finance-card').forEach(el => el.innerHTML = finHTML);
+            document.querySelectorAll('#admin-finance-card, #finance-card').forEach(el => el.innerHTML = finHTML);
 
             if(role === 'RESIDENT') {
                 const u = STATE.residents[currentUser];
@@ -340,8 +356,6 @@
                 else if(u.requestCash) { chip.innerText = "WAITING ADMIN..."; chip.className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[8px] font-black"; document.getElementById('pay-btn').style.display='none'; }
                 else { chip.innerText = "UNPAID !"; chip.className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[8px] font-black"; document.getElementById('pay-btn').style.display='block'; }
                 document.getElementById('hist-list').innerHTML = u.history ? u.history.map((h, i) => `<div class="bg-white dark:bg-slate-900 p-5 rounded-3xl flex justify-between items-center shadow-sm border dark:border-slate-800"><div class="flex items-center gap-4"><span class="material-symbols-outlined text-emerald-500 font-bold">verified</span><div><p class="text-sm font-black italic uppercase text-blue-900 tracking-tighter italic font-black uppercase tracking-tighter">${h.month}</p><p class="text-[8px] font-bold opacity-40 uppercase tracking-widest font-black italic">${h.date}</p></div></div><button onclick="showReceipt(${i})" class="bg-blue-50 dark:bg-blue-900/40 p-3 rounded-2xl text-brand dark:text-blue-300 shadow-sm"><span class="material-symbols-outlined text-sm font-bold">receipt</span></button></div>`).join('') : '<p class="text-center py-20 opacity-30 text-xs font-black uppercase tracking-widest">No history found</p>';
-                
-                // Announcements List
                 document.getElementById('res-ann-list').innerHTML = STATE.announcements ? STATE.announcements.map(a => `<div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-2xl border border-orange-100 dark:border-orange-900/50 flex gap-3 shadow-sm"><span class="material-symbols-outlined text-orange-600 text-sm font-black">notifications_active</span><p class="text-[11px] font-bold text-orange-950 dark:text-orange-200 leading-tight italic tracking-tighter">${a.text}</p></div>`).join('') : '';
             }
 
