@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="light">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parimal Complex App - Ultimate v12</title>
@@ -57,7 +57,6 @@
                 <span id="m-theme-txt" class="text-xs font-bold uppercase tracking-widest font-black">Theme</span>
                 <span class="material-symbols-outlined text-yellow-400" id="theme-icon">light_mode</span>
             </button>
-            <!-- UPDATED LOGOUT BUTTON -->
             <button onclick="handleLogout()" class="w-full flex items-center gap-4 p-4 text-red-300 bg-red-500/10 rounded-2xl">
                 <span class="material-symbols-outlined">logout</span><span class="font-bold uppercase text-xs">Logout Account</span>
             </button>
@@ -71,23 +70,12 @@
         <div class="p-8 text-center flex-1 flex flex-col justify-center max-w-sm mx-auto">
             <h1 class="text-4xl font-black text-brand dark:text-blue-400 mb-2 italic tracking-tighter uppercase">Parimal Complex</h1>
             <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10 tracking-[0.3em]">Official Portal</p>
-            <button onclick="showScreen('scr-lang')" class="w-full bg-brand text-white py-5 rounded-3xl font-black shadow-xl uppercase tracking-widest active:scale-95 transition-transform">Get Started</button>
+            <!-- DIRECTLY TO LOGIN NOW -->
+            <button onclick="showScreen('scr-login')" class="w-full bg-brand text-white py-5 rounded-3xl font-black shadow-xl uppercase tracking-widest active:scale-95 transition-transform">Get Started</button>
         </div>
     </section>
 
-    <!-- 2. LANGUAGE PAGE -->
-    <section id="scr-lang" class="screen bg-slate-50 dark:bg-slate-950 p-8 flex items-center justify-center">
-        <div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl w-full max-w-sm text-center border dark:border-slate-800">
-            <h2 class="text-2xl font-black mb-6 text-brand dark:text-blue-400 uppercase tracking-tighter italic">Select Language</h2>
-            <div class="space-y-3">
-                <button onclick="setLang('en')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand transition-all">English</button>
-                <button onclick="setLang('hi')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand transition-all">हिन्दी (Hindi)</button>
-                <button onclick="setLang('gu')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand transition-all">ગુજરાતી (Gujarati)</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 3. LOGIN -->
+    <!-- 2. LOGIN -->
     <section id="scr-login" class="screen bg-white dark:bg-slate-900 p-8">
         <div class="max-w-sm mx-auto w-full flex flex-col justify-center h-full text-center">
             <h1 class="text-3xl font-black text-brand dark:text-blue-400 mb-2 uppercase italic tracking-tighter">Login</h1>
@@ -100,7 +88,7 @@
         </div>
     </section>
 
-    <!-- DASHBOARD SCREENS REMAIN THE SAME -->
+    <!-- DASHBOARDS -->
     <section id="scr-res-dash" class="screen">
         <div class="header-slot"></div>
         <div class="p-6 pb-24 space-y-6 overflow-y-auto">
@@ -143,8 +131,7 @@
         </div>
     </section>
 
-    <!-- REMAINING PAGES (ADMIN RES, EXP, ANN, HISTORY, PROFILE, RECEIPT, PAY MODAL, TOAST, TEMPLATE) -->
-    <!-- [Keeping your exact HTML structure for all sections below...] -->
+    <!-- OTHER SECTIONS -->
     <section id="scr-admin-res" class="screen bg-white dark:bg-slate-950">
         <header class="p-6 border-b dark:border-slate-800 flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs">Resident Maintenance</h1></header>
         <div class="p-6 space-y-6 overflow-y-auto pb-20">
@@ -203,6 +190,7 @@
         </div>
     </section>
 
+    <!-- RECEIPT, MODALS, TEMPLATES -->
     <div id="modal-receipt" class="fixed inset-0 bg-black/90 hidden z-[3000] flex flex-col items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center border-t-8 border-brand">
             <h1 class="font-black text-brand text-xl uppercase mb-1 tracking-tighter">Parimal Complex</h1>
@@ -242,27 +230,22 @@
     </template>
 
     <script>
-        // --- 1. FIREBASE & STATE ---
         firebase.initializeApp({ databaseURL: "https://parimal-complex-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = firebase.database();
         let STATE = {};
         let currentUser = null;
         let role = "";
-        let lang = 'en';
+        let lang = 'en'; // Default set to English
         window.ex_m = 'CASH';
 
         const T = {
-            en: { hi: "Hi", maint: "Maintenance Fee", exp: "Building Expenses", logout: "Logout", theme: "Theme", pay: "Pay Now", paid: "Paid", pend: "Unpaid neighbors", hist: "Records", dash: "Dashboard", profile: "Profile", ann: "Management notices" },
-            hi: { hi: "नमस्ते", maint: "रखरखाव शुल्क", exp: "बिल्डिंग खर्च", logout: "लॉगआउट", theme: "थीम", pay: "भुगतान करें", paid: "भुगतान", pend: "बाकी लोग", hist: "इतिहास", dash: "डैशबोर्ड", profile: "प्रोफ़ाइल", ann: "प्रबंधन नोटिस" },
-            gu: { hi: "નમસ્તે", maint: "જાળવણી ફી", exp: "બિલ્ડિંગ ખર્ચ", logout: "લોગઆઉટ", theme: "થીમ", pay: "ચુકવણી કરો", paid: "ચુકવેલ", pend: "બાકી સભ્યો", hist: "ઇતિહાસ", dash: "ડેશબોર્ડ", profile: "પ્રોફાઇલ", ann: "નોટિસ" }
+            en: { hi: "Hi", maint: "Maintenance Fee", exp: "Building Expenses", logout: "Logout", theme: "Theme", pay: "Pay Now", paid: "Paid", pend: "Unpaid neighbors", hist: "Records", dash: "Dashboard", profile: "Profile", ann: "Management notices" }
         };
 
-        // --- 2. DATA SYNC & AUTO-LOGIN ---
         db.ref('Parimal_Prod_Final_v12').on('value', (snap) => {
             STATE = snap.val() || { cash: 0, online: 0, expenditures: [], announcements: [], residents: { "ADMIN": { pass: "123", isStaff: true, name: "Admin" } } };
             document.getElementById('loader').classList.add('hidden');
             
-            // SESSION CHECK: If not logged in, check localStorage memory
             if (!currentUser) {
                 const savedUid = localStorage.getItem('parimal_uid');
                 const savedRole = localStorage.getItem('parimal_role');
@@ -272,13 +255,11 @@
                     showScreen(role === 'ADMIN' ? 'scr-admin-dash' : 'scr-res-dash');
                 }
             }
-
             if(currentUser) renderUI();
         });
 
         function sync() { db.ref('Parimal_Prod_Final_v12').set(STATE); }
 
-        // --- 3. UI ENGINE ---
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -291,13 +272,9 @@
             renderUI();
         }
 
-        function setLang(l) { lang = l; showScreen('scr-login'); }
-
-        // --- LOGIN & SESSION PERSISTENCE ---
         function handleLogin() {
             const id = document.getElementById('uid').value.toUpperCase();
             const p = document.getElementById('pass').value;
-            
             if(id === "ADMIN" && p === "123") { 
                 currentUser = "ADMIN"; role = "ADMIN"; 
                 saveSession(id, role);
@@ -319,7 +296,7 @@
         function handleLogout() {
             localStorage.removeItem('parimal_uid');
             localStorage.removeItem('parimal_role');
-            location.reload(); // Restarts the app to login screen
+            location.reload();
         }
 
         function renderUI() {
@@ -373,7 +350,6 @@
             if(document.getElementById('res-exp-list')) document.getElementById('res-exp-list').innerHTML = expsHTML;
         }
 
-        // --- CORE ACTIONS ---
         function toggleMenu() { const m = document.getElementById('side-menu'); const o = document.getElementById('menu-overlay'); m.classList.toggle('-translate-x-full'); o.classList.toggle('hidden'); }
         function adjBal(type) { const v = Number(document.getElementById('adm-adj-amt').value); const note = document.getElementById('adm-adj-note').value; if(!v) return; if(type==='cash') STATE.cash = (STATE.cash||0)+v; else STATE.online = (STATE.online||0)+v; sync(); document.getElementById('adm-adj-amt').value=""; document.getElementById('adm-adj-note').value=""; alert("Sync Success: " + (note || "Balance Adjusted")); }
         
