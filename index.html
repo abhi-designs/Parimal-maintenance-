@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropManage - Parimal Complex</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: '#00236f' } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        .screen { display: none; min-height: 100vh; width: 100%; }
+        .screen.active { display: flex; flex-direction: column; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        #side-menu { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; }
+        .btn-active { border-color: #00236f !important; background-color: rgba(0,35,111,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+
+    <!-- LOADING OVERLAY -->
+    <div id="loader" class="fixed inset-0 bg-white dark:bg-slate-900 z-[3000] flex flex-col items-center justify-center text-center">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-brand rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black uppercase tracking-widest text-brand">Accessing Parimal Cloud...</p>
+    </div>
+
+    <!-- ERROR POPUP -->
+    <div id="modal-error" class="fixed inset-0 bg-black/60 hidden z-[4000] flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-[2rem] p-8 w-full max-w-xs text-center border-t-8 border-red-500 shadow-2xl">
+            <span class="material-symbols-outlined text-red-500 text-5xl mb-4 font-black">error</span>
+            <h3 class="text-xl font-black uppercase mb-2">Invalid Login</h3>
+            <p class="text-sm text-slate-500 mb-6">Wrong ID or Password.</p>
+            <button onclick="document.getElementById('modal-error').classList.add('hidden')" class="w-full bg-red-500 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest">Retry</button>
+        </div>
+    </div>
+
+    <!-- SIDE MENU -->
+    <div id="side-menu" class="fixed inset-y-0 left-0 w-72 bg-brand text-white p-6 transform -translate-x-full shadow-2xl">
+        <div class="flex justify-between items-center mb-10 text-blue-200">
+            <span class="font-black italic text-xl tracking-tighter">PARIMAL APP</span>
+            <button onclick="toggleMenu()" class="p-2 hover:bg-white/10 rounded-full"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div id="menu-links" class="space-y-4"></div>
+        <div class="mt-10 pt-6 border-t border-white/10 space-y-4">
+            <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl">
+                <span id="m-theme-txt" class="text-xs font-bold uppercase tracking-widest font-black">Theme</span>
+                <span class="material-symbols-outlined text-yellow-400" id="theme-icon">light_mode</span>
+            </button>
+            <button onclick="location.reload()" class="w-full flex items-center gap-4 p-4 text-red-300 bg-red-500/10 rounded-2xl">
+                <span class="material-symbols-outlined">logout</span><span class="font-bold uppercase text-xs">Logout</span>
+            </button>
+        </div>
+    </div>
+    <div id="menu-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 hidden z-[1900] backdrop-blur-sm"></div>
+
+    <!-- WELCOME -->
+    <section id="scr-welcome" class="screen active bg-white dark:bg-slate-900">
+        <div class="h-[45vh] relative"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></div></div>
+        <div class="p-8 text-center flex-1 flex flex-col justify-center max-w-sm mx-auto">
+            <h1 class="text-4xl font-black text-brand dark:text-blue-400 mb-2 italic tracking-tighter uppercase">Parimal Complex</h1>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10 tracking-[0.3em]">Resident Portal</p>
+            <button onclick="showScreen('scr-lang')" class="w-full bg-brand text-white py-5 rounded-3xl font-black shadow-xl uppercase tracking-widest active:scale-95 transition-transform">Get Started</button>
+        </div>
+    </section>
+
+    <!-- LANGUAGE SELECTION -->
+    <section id="scr-lang" class="screen bg-slate-50 dark:bg-slate-950 p-8 flex items-center justify-center">
+        <div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl w-full max-w-sm text-center border dark:border-slate-800">
+            <h2 class="text-2xl font-black mb-6 text-brand dark:text-blue-400 uppercase tracking-tighter italic">Language</h2>
+            <div class="space-y-3">
+                <button onclick="setLang('en')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand">English</button>
+                <button onclick="setLang('hi')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand">हिन्दी (Hindi)</button>
+                <button onclick="setLang('gu')" class="w-full py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:border-brand">ગુજરાતી (Gujarati)</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOGIN -->
+    <section id="scr-login" class="screen bg-white dark:bg-slate-900 p-8 text-center">
+        <div class="max-w-sm mx-auto w-full flex flex-col justify-center h-full">
+            <h1 class="text-3xl font-black text-brand dark:text-blue-400 mb-2 uppercase">Login</h1>
+            <p class="text-slate-400 text-[10px] font-black uppercase mb-12 tracking-widest italic">Authorized Access Only</p>
+            <div class="space-y-4">
+                <input type="text" id="uid" placeholder="UNIT ID (e.g. A-101)" class="w-full bg-slate-100 dark:bg-slate-800 p-5 rounded-3xl border-none font-black uppercase text-center outline-none">
+                <input type="password" id="pass" placeholder="PASSWORD" class="w-full bg-slate-100 dark:bg-slate-800 p-5 rounded-3xl border-none text-center outline-none">
+                <button onclick="handleLogin()" class="w-full bg-brand text-white py-5 rounded-3xl font-black shadow-lg">SIGN IN</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- DASHBOARDS -->
+    <section id="scr-res-dash" class="screen">
+        <div class="header-slot"></div>
+        <div class="p-6 pb-24 space-y-6 overflow-y-auto">
+            <h2 class="text-2xl font-black italic tracking-tighter text-slate-800 dark:text-white"><span id="d-hi">Hi</span>, <span id="res-name-h" class="text-brand dark:text-blue-400 italic">--</span></h2>
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border dark:border-slate-800">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest" id="d-maint-label">Maintenance</p>
+                    <span id="status-chip" class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">--</span>
+                </div>
+                <h3 id="res-fee-h" class="text-4xl font-black text-brand dark:text-blue-400 mb-8 tracking-tighter">₹0.00</h3>
+                <button id="pay-btn" onclick="document.getElementById('pay-modal').classList.remove('hidden')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Pay Now</button>
+            </div>
+            <div id="res-ann-list" class="space-y-3"></div>
+            <div id="stat-counts" class="grid grid-cols-2 gap-3"></div>
+            <div id="finance-card"></div>
+            <div class="space-y-4"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest" id="d-exp-label">Expenditures</h3><div id="res-exp-list" class="space-y-3"></div></div>
+        </div>
+    </section>
+
+    <section id="scr-admin-dash" class="screen">
+        <div class="header-slot"></div>
+        <div class="p-6 pb-24 space-y-6 overflow-y-auto text-brand dark:text-white">
+            <h2 class="text-2xl font-black italic tracking-tighter">Admin Dashboard</h2>
+            <div id="admin-finance-card"></div>
+            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800 space-y-4 shadow-sm">
+                <h3 class="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"><span class="material-symbols-outlined text-sm">savings</span> Global Balance Tool</h3>
+                <input type="number" id="adm-adj-amt" placeholder="Amount" class="w-full p-4 rounded-xl dark:bg-slate-800 border-none font-bold outline-none text-sm">
+                <div class="flex gap-2">
+                    <button onclick="adjBal('online')" class="flex-1 bg-brand text-white py-3 rounded-xl font-bold text-[9px] uppercase">Bank</button>
+                    <button onclick="adjBal('cash')" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-bold text-[9px] uppercase">Cash</button>
+                </div>
+            </div>
+            <div id="admin-pending-list" class="space-y-3"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="showScreen('scr-admin-res')" class="bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col items-center gap-2"><span class="material-symbols-outlined text-blue-500 bg-blue-50 p-3 rounded-full font-bold">group</span><span class="text-[10px] font-black uppercase tracking-widest">Residents</span></button>
+                <button onclick="showScreen('scr-admin-exp')" class="bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col items-center gap-2"><span class="material-symbols-outlined text-red-500 bg-red-50 p-3 rounded-full font-bold">receipt_long</span><span class="text-[10px] font-black uppercase tracking-widest">Expenses</span></button>
+                <button onclick="showScreen('scr-admin-ann')" class="bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col items-center gap-2 col-span-2"><span class="material-symbols-outlined text-orange-500 bg-orange-50 p-3 rounded-full font-bold">campaign</span><span class="text-[10px] font-black uppercase tracking-widest">Announcements</span></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN RESIDENT MANAGER (THE FIX) -->
+    <section id="scr-admin-res" class="screen bg-white dark:bg-slate-950">
+        <header class="p-6 border-b dark:border-slate-800 flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs">Manage Neighbors</h1></header>
+        <div class="p-6 space-y-6 overflow-y-auto pb-20">
+            <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-3xl space-y-3 border">
+                <input id="new-id" placeholder="UNIT (A-101)" class="w-full p-3 rounded-xl dark:bg-slate-800 font-bold uppercase text-xs border-none outline-none">
+                <input id="new-name" placeholder="NAME" class="w-full p-3 rounded-xl dark:bg-slate-800 font-bold text-xs border-none outline-none">
+                <input id="new-ph" placeholder="PHONE" class="w-full p-3 rounded-xl dark:bg-slate-800 font-bold text-xs border-none outline-none">
+                <input id="new-pass" placeholder="PASSWORD" class="w-full p-3 rounded-xl dark:bg-slate-800 font-bold text-xs border-none outline-none">
+                <input id="new-fee" type="number" placeholder="MONTHLY FEE" class="w-full p-3 rounded-xl dark:bg-slate-800 font-bold text-xs border-none outline-none">
+                <button onclick="addRes()" class="w-full bg-brand text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg">Save to Cloud</button>
+            </div>
+            <div id="admin-res-list" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <!-- OTHER SCREENS (EXPENSES, HISTORY, PROFILE, RECEIPT) -->
+    <section id="scr-admin-exp" class="screen bg-white dark:bg-slate-950">
+        <header class="p-6 border-b flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs tracking-tighter">Expenditures</h1></header>
+        <div class="p-6 space-y-6 overflow-y-auto pb-20">
+            <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl space-y-4 border border-slate-200">
+                <input type="text" id="exp-title-in" placeholder="Reason" class="w-full p-4 rounded-xl border-none font-bold text-sm dark:bg-slate-800 outline-none">
+                <input type="number" id="exp-amt-in" placeholder="Amount" class="w-full p-4 rounded-xl border-none font-bold text-sm dark:bg-slate-800 outline-none">
+                <div class="flex gap-2">
+                    <button id="em-cash" onclick="window.ex_m='CASH'; updateExBtn()" class="flex-1 py-3 rounded-xl border-2 btn-active text-[9px] font-black uppercase">Cash</button>
+                    <button id="em-bank" onclick="window.ex_m='BANK'; updateExBtn()" class="flex-1 py-3 rounded-xl border-2 border-slate-200 text-[9px] font-black uppercase">Bank</button>
+                </div>
+                <button onclick="postExp()" class="w-full bg-red-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg">Subtract & Record</button>
+            </div>
+            <div id="admin-exp-list-full" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <section id="scr-admin-ann" class="screen bg-white dark:bg-slate-950">
+        <header class="p-6 border-b flex items-center gap-4 sticky top-0 bg-white dark:bg-slate-900 z-20"><button onclick="showScreen('scr-admin-dash')"><span class="material-symbols-outlined">arrow_back</span></button><h1 class="font-black italic uppercase text-xs tracking-tighter">Broadcast</h1></header>
+        <div class="p-6 space-y-6 overflow-y-auto pb-20">
+            <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl space-y-4 border border-slate-200">
+                <textarea id="ann-in" placeholder="Announcement details..." class="w-full p-4 rounded-xl border-none font-bold text-xs dark:bg-slate-800 h-24 outline-none"></textarea>
+                <button onclick="postAnn()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg">Publish Notice</button>
+            </div>
+            <div id="admin-ann-list-full" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <section id="scr-history" class="screen bg-slate-50 dark:bg-slate-950 text-brand dark:text-blue-300">
+        <header class="p-6 bg-white dark:bg-slate-900 border-b flex items-center gap-4 sticky top-0 z-20 shadow-sm"><button onclick="showScreen('scr-res-dash')"><span class="material-symbols-outlined text-brand">arrow_back</span></button><h1 class="font-black uppercase text-xs tracking-widest italic" id="l-hist-title">Maintenance Records</h1></header>
+        <div id="hist-list" class="p-6 space-y-4 overflow-y-auto pb-20"></div>
+    </section>
+
+    <section id="scr-profile" class="screen bg-white dark:bg-slate-900 p-8 text-brand dark:text-blue-300">
+        <button onclick="showScreen('scr-res-dash')" class="mb-10"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="text-2xl font-black mb-8 italic uppercase tracking-tighter">Account Settings</h2>
+        <div class="space-y-6 max-w-sm mx-auto">
+            <div><label class="text-[9px] font-black opacity-40 uppercase tracking-widest">Full Name</label><input type="text" id="prof-name" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl font-bold mt-2 border-none outline-none text-slate-800 dark:text-white"></div>
+            <div><label class="text-[9px] font-black opacity-40 uppercase tracking-widest">Login Password</label><input type="text" id="prof-pass" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl font-bold mt-2 border-none outline-none text-slate-800 dark:text-white"></div>
+            <div><label class="text-[9px] font-black opacity-40 uppercase tracking-widest">Mobile No.</label><input type="text" id="prof-phone" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl font-bold mt-2 border-none outline-none text-slate-800 dark:text-white"></div>
+            <button onclick="saveProf()" class="w-full bg-brand text-white py-4 rounded-2xl font-black shadow-lg uppercase text-xs">Update Profile</button>
+        </div>
+    </section>
+
+    <!-- RECEIPT MODAL -->
+    <div id="modal-receipt" class="fixed inset-0 bg-black/90 hidden z-[3000] flex flex-col items-center justify-center p-6 backdrop-blur-md">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center border-t-8 border-brand">
+            <h1 class="font-black text-brand text-xl uppercase mb-1 tracking-tighter">Parimal Complex</h1>
+            <p class="text-[8px] text-slate-400 font-bold mb-6 italic uppercase">Digital Payment Receipt</p>
+            <div class="border-y border-dashed py-4 mb-6 text-left text-[10px] font-black space-y-2 uppercase tracking-tighter">
+                <div class="flex justify-between"><span>Unit:</span> <span id="r-unit" class="text-blue-900 font-black tracking-widest">--</span></div>
+                <div class="flex justify-between"><span>Month Paid:</span> <span id="r-month" class="text-blue-700 font-black tracking-widest uppercase italic">--</span></div>
+                <div class="flex justify-between"><span>Resident:</span> <span id="r-name" class="font-black uppercase tracking-tighter italic">--</span></div>
+                <div class="flex justify-between"><span>Date:</span> <span id="r-date" class="font-black tracking-widest italic opacity-50">--</span></div>
+            </div>
+            <h2 id="r-amt" class="text-4xl font-black text-brand mb-6 italic tracking-tighter uppercase font-black tracking-widest">₹0.00</h2>
+            <div class="bg-emerald-50 py-2 rounded-xl text-emerald-700 font-black text-[9px] tracking-widest uppercase italic">✓ PAYMENT VERIFIED</div>
+        </div>
+        <button onclick="document.getElementById('modal-receipt').classList.add('hidden')" class="mt-6 w-full max-w-sm bg-white/20 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Close</button>
+    </div>
+
+    <!-- PAYMENT OPTIONS -->
+    <div id="pay-modal" class="fixed inset-0 bg-black/80 hidden z-[1000] flex items-end p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md mx-auto rounded-t-[3rem] rounded-b-2xl p-8 space-y-6">
+            <h3 class="text-xl font-black text-center text-brand dark:text-blue-400 italic tracking-widest">Select Mode</h3>
+            <button onclick="pay('ONLINE')" class="w-full bg-brand text-white p-6 rounded-3xl flex justify-between items-center shadow-lg"><div class="text-left font-black">ONLINE (UPI)<p class="text-[8px] opacity-60 uppercase italic font-normal tracking-wider">Direct To Bank</p></div><span class="material-symbols-outlined text-4xl font-black">qr_code_2</span></button>
+            <button onclick="pay('CASH')" class="w-full bg-slate-100 dark:bg-slate-800 p-6 rounded-3xl flex justify-between items-center text-slate-700 dark:text-slate-300"><div class="text-left font-black uppercase tracking-tighter">Handover Cash<p class="text-[8px] opacity-60 uppercase italic font-normal tracking-wider font-bold italic tracking-tighter">Requires approval</p></div><span class="material-symbols-outlined text-green-600 text-4xl font-black tracking-tighter">payments</span></button>
+            <button onclick="document.getElementById('pay-modal').classList.add('hidden')" class="w-full text-slate-400 font-bold py-2 uppercase text-[10px] tracking-widest font-black italic">Cancel</button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900 text-white p-5 rounded-3xl shadow-2xl flex items-center gap-4 transition-all transform translate-y-60 z-[5000]">
+        <span class="material-symbols-outlined text-blue-400 font-bold">sms</span>
+        <p id="toast-msg" class="text-[10px] font-bold leading-tight opacity-90 tracking-tighter uppercase italic">--</p>
+    </div>
+
+    <template id="header-template">
+        <header class="p-4 bg-white dark:bg-slate-900 border-b dark:border-slate-800 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+            <button onclick="toggleMenu()" class="p-1"><span class="material-symbols-outlined text-brand dark:text-blue-400 font-bold">menu</span></button>
+            <span class="font-black text-brand dark:text-blue-400 tracking-tighter italic">Parimal Complex</span>
+            <div id="user-initials" class="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tighter italic">--</div>
+        </header>
+    </template>
+
+    <script>
+        // --- CONFIG & TRANSLATION ---
+        firebase.initializeApp({ databaseURL: "https://parimal-complex-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        const db = firebase.database();
+        let STATE = {};
+        let currentUser = null;
+        let role = "";
+        let lang = 'en';
+        window.ex_m = 'CASH';
+
+        const TRANSLATE = {
+            en: { hi: "Hi", maint: "Maintenance Fee", exp: "Building Expenses", logout: "Logout", theme: "Theme", pay: "Pay Now", paid: "Paid", pend: "Unpaid", hist: "Records", dash: "Dashboard", profile: "Profile" },
+            hi: { hi: "नमस्ते", maint: "रखरखाव शुल्क", exp: "बिल्डिंग खर्च", logout: "लॉगआउट", theme: "थीम", pay: "चुकाएं", paid: "भुगतान", pend: "बाकी लोग", hist: "इतिहास", dash: "डैशबोर्ड", profile: "प्रोफ़ाइल" },
+            gu: { hi: "નમસ્તે", maint: "જાળવણી ફી", exp: "બિલ્ડિંગ ખર્ચ", logout: "લોગઆઉટ", theme: "થીમ", pay: "ચુકવણી કરો", paid: "ચુકવેલ", pend: "બાકી", hist: "ઇતિહાસ", dash: "ડેશબોર્ડ", profile: "પ્રોફાઇલ" }
+        };
+
+        // --- DATABASE LIVE SYNC ---
+        db.ref('Parimal_App_vFinal').on('value', (snap) => {
+            STATE = snap.val() || { cash: 0, online: 0, expenditures: [], announcements: [], residents: { "ADMIN": { pass: "123", isStaff: true, name: "Admin" } } };
+            document.getElementById('loader').classList.add('hidden');
+            if(currentUser) renderUI();
+        });
+
+        function sync() { db.ref('Parimal_App_vFinal').set(STATE); }
+
+        // --- CORE NAVIGATION ---
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id.includes('dash')) {
+                document.querySelectorAll('.header-slot').forEach(slot => {
+                    slot.innerHTML = document.getElementById('header-template').innerHTML;
+                    slot.querySelector('#user-initials').innerText = currentUser === "ADMIN" ? "AD" : currentUser.substring(0,2);
+                });
+            }
+            renderUI();
+        }
+
+        function setLang(l) { 
+            lang = l; 
+            showScreen('scr-login'); 
+        }
+
+        function handleLogin() {
+            const id = document.getElementById('uid').value.toUpperCase();
+            const p = document.getElementById('pass').value;
+            if(id === "ADMIN" && p === "123") { currentUser = "ADMIN"; role = "ADMIN"; showScreen('scr-admin-dash'); }
+            else if(STATE.residents[id] && STATE.residents[id].pass === p) { currentUser = id; role = "RESIDENT"; showScreen('scr-res-dash'); }
+            else { document.getElementById('modal-error').classList.remove('hidden'); }
+        }
+
+        function toggleMenu() { 
+            const m = document.getElementById('side-menu'); const o = document.getElementById('menu-overlay');
+            m.classList.toggle('-translate-x-full'); o.classList.toggle('hidden');
+        }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+        function renderUI() {
+            if(!STATE.residents || !currentUser) return;
+            const d = TRANSLATE[lang];
+            const total = (STATE.cash || 0) + (STATE.online || 0);
+            const resKeys = Object.keys(STATE.residents).filter(k => !STATE.residents[k].isStaff);
+            const curMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            const paidCount = resKeys.filter(k => STATE.residents[k].lastPaidMonth === curMonth).length;
+
+            // REFRESH MENU LINKS (FIXED DISAPPEARING MENU)
+            const lnk = document.getElementById('menu-links');
+            if(role === 'ADMIN') {
+                lnk.innerHTML = `<button onclick="showScreen('scr-admin-dash');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">dashboard</span><span class="font-bold">${d.dash}</span></button>`;
+            } else {
+                lnk.innerHTML = `<button onclick="showScreen('scr-res-dash');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">dashboard</span><span class="font-bold">${d.dash}</span></button>
+                <button onclick="showScreen('scr-history');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">history</span><span class="font-bold font-black tracking-tighter italic uppercase text-xs">${d.hist}</span></button>
+                <button onclick="showScreen('scr-profile');toggleMenu()" class="w-full flex gap-4 p-4 hover:bg-white/10 rounded-2xl"><span class="material-symbols-outlined">person</span><span class="font-bold font-black tracking-tighter italic uppercase text-xs">${d.profile}</span></button>`;
+            }
+
+            // Cards
+            const finHTML = `<div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border dark:border-slate-800 relative overflow-hidden"><p class="text-[10px] font-black text-slate-400 uppercase mb-2 italic">Building Funds</p><h3 class="text-4xl font-black text-brand dark:text-blue-400 mb-8 italic tracking-tighter italic uppercase font-black tracking-tighter">₹${total.toLocaleString()}</h3><div class="grid grid-cols-2 gap-4 border-t dark:border-slate-800 pt-6"><div><p class="text-[8px] font-bold text-slate-300 uppercase italic">Bank</p><p class="text-lg font-black text-brand dark:text-blue-300 italic tracking-tighter italic uppercase font-black tracking-tighter">₹${(STATE.online||0).toLocaleString()}</p></div><div class="border-l border-slate-100 dark:border-slate-800 pl-4"><p class="text-[8px] font-bold text-slate-300 uppercase italic">Cash</p><p class="text-lg font-black text-slate-700 dark:text-slate-400 italic tracking-tighter italic uppercase font-black tracking-tighter">₹${(STATE.cash||0).toLocaleString()}</p></div></div></div>`;
+            document.querySelectorAll('#finance-card, #admin-finance-card').forEach(el => el.innerHTML = finHTML);
+
+            const statHTML = `<div class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-3xl border border-emerald-100 dark:border-emerald-800 text-center shadow-sm"><span class="text-xl font-black text-emerald-700 dark:text-emerald-400 italic">${paidCount}</span><p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest font-black uppercase tracking-tighter">${d.paid}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-3xl border border-red-100 dark:border-red-800 text-center shadow-sm"><span class="text-xl font-black text-red-700 dark:text-red-400 italic">${resKeys.length - paidCount}</span><p class="text-[9px] font-bold text-red-600 uppercase tracking-widest font-black uppercase tracking-tighter">${d.pend}</p></div>`;
+            if(document.getElementById('stat-counts')) document.getElementById('stat-counts').innerHTML = statHTML;
+
+            // Announcements
+            const resAnnsHTML = STATE.announcements ? STATE.announcements.map(a => `<div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800 flex gap-3 shadow-sm"><span class="material-symbols-outlined text-blue-900 text-sm">campaign</span><p class="text-xs font-bold text-brand dark:text-blue-200 leading-tight">${a.text}</p></div>`).join('') : '';
+            if(document.getElementById('res-ann-list')) document.getElementById('res-ann-list').innerHTML = resAnnsHTML;
+
+            if(role === 'RESIDENT') {
+                const u = STATE.residents[currentUser];
+                document.getElementById('d-hi').innerText = d.hi;
+                document.getElementById('d-maint-label').innerText = d.maint;
+                document.getElementById('d-exp-label').innerText = d.exp;
+                document.getElementById('pay-btn').innerText = d.pay;
+                document.getElementById('res-name-h').innerText = u.name;
+                document.getElementById('res-fee-h').innerText = "₹" + (u.fee||0).toLocaleString();
+                const chip = document.getElementById('status-chip');
+                if(u.lastPaidMonth === curMonth) { chip.innerText = "PAID ✓"; chip.className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[8px] font-black"; document.getElementById('pay-btn').style.display='none'; }
+                else if(u.requestCash) { chip.innerText = "WAITING..."; chip.className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[8px] font-black"; document.getElementById('pay-btn').style.display='none'; }
+                else { chip.innerText = "DUE !"; chip.className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[8px] font-black"; document.getElementById('pay-btn').style.display='block'; }
+                document.getElementById('hist-list').innerHTML = u.history ? u.history.map((h, i) => `<div class="bg-white dark:bg-slate-900 p-5 rounded-3xl flex justify-between items-center shadow-sm border dark:border-slate-800"><div class="flex items-center gap-4"><span class="material-symbols-outlined text-emerald-500 font-bold">verified</span><div><p class="text-sm font-black italic uppercase">${h.month}</p><p class="text-[8px] font-bold opacity-40 uppercase tracking-widest">${h.date}</p></div></div><button onclick="showReceipt(${i})" class="bg-blue-50 dark:bg-blue-900/40 p-3 rounded-2xl text-brand"><span class="material-symbols-outlined text-sm font-bold">receipt</span></button></div>`).join('') : '';
+            }
+
+            if(role === 'ADMIN') {
+                const pend = Object.keys(STATE.residents).filter(k => STATE.residents[k].requestCash);
+                document.getElementById('admin-pending-list').innerHTML = pend.map(k => `<div class="bg-orange-50 dark:bg-orange-900/20 p-5 rounded-3xl border flex justify-between items-center"><div><p class="text-sm font-black text-brand">${k}</p><p class="text-[9px] opacity-60 font-bold uppercase">${STATE.residents[k].name}</p></div><button onclick="approve('${k}')" class="bg-brand text-white text-[9px] font-black px-6 py-3 rounded-full uppercase">Approve</button></div>`).join('') || '';
+                document.getElementById('admin-res-list').innerHTML = resKeys.map(k => `<div class="p-5 bg-white border rounded-3xl flex justify-between items-center shadow-sm"><div><p class="font-black text-sm text-brand uppercase">${k}</p><p class="text-[9px] opacity-40 font-black tracking-widest uppercase">Fee: ₹${STATE.residents[k].fee}</p></div><button onclick="remRes('${k}')" class="text-red-400 p-2"><span class="material-symbols-outlined text-sm font-bold">delete</span></button></div>`).join('');
+                document.getElementById('admin-exp-list-full').innerHTML = STATE.expenditures ? STATE.expenditures.map(e => `<div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border flex justify-between items-center shadow-sm"><div><p class="text-xs font-black text-slate-700 dark:text-slate-300 tracking-tighter">${e.title}</p><p class="text-[8px] opacity-40 uppercase tracking-widest font-black italic uppercase tracking-tighter">${e.date} via ${e.method}</p></div><p class="text-xs font-black text-red-600 italic">₹${e.amt}</p></div>`).join('') : '';
+                document.getElementById('admin-ann-list-full').innerHTML = STATE.announcements ? STATE.announcements.map(a => `<div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border flex justify-between items-center shadow-sm"><div><p class="text-xs font-black text-slate-700 dark:text-slate-300 tracking-tighter italic uppercase tracking-widest italic">${a.text}</p><p class="text-[8px] opacity-40 font-black uppercase tracking-widest">${a.date}</p></div><button onclick="delAnn(${a.id})" class="text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div>`).join('') : '';
+            }
+            const expsHTML = STATE.expenditures ? STATE.expenditures.map(e => `<div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border flex justify-between items-center shadow-sm"><div><p class="text-xs font-black text-slate-700 dark:text-slate-300 tracking-tighter italic uppercase tracking-widest italic font-black tracking-tighter uppercase tracking-widest italic">${e.title}</p><p class="text-[8px] opacity-40 font-black uppercase tracking-widest italic font-black uppercase tracking-widest italic">${e.date}</p></div><p class="text-xs font-black text-red-600 italic tracking-tighter font-black tracking-tighter uppercase tracking-widest italic">₹${e.amt}</p></div>`).join('') : '';
+            if(document.getElementById('res-exp-list')) document.getElementById('res-exp-list').innerHTML = expsHTML;
+        }
+
+        // --- ACTIONS ---
+        function adjBal(type) {
+            const v = Number(document.getElementById('adm-adj-amt').value);
+            if(!v) return;
+            if(type==='cash') STATE.cash = (STATE.cash||0)+v; else STATE.online = (STATE.online||0)+v;
+            sync(); document.getElementById('adm-adj-amt').value=""; alert("Funds Synchronized");
+        }
+
+        function addRes() {
+            const id = document.getElementById('new-id').value.toUpperCase();
+            const n = document.getElementById('new-name').value;
+            const ph = document.getElementById('new-ph').value;
+            const p = document.getElementById('new-pass').value;
+            const f = Number(document.getElementById('new-fee').value);
+            if(!id||!n||!p||!f) return alert("Fill data");
+            STATE.residents[id] = { name: n, ph: ph, pass: p, fee: f, lastPaidMonth: '', requestCash: false, history: [] };
+            sync(); alert("Neighbor Saved");
+        }
+
+        function remRes(k) { if(confirm(`Delete Unit ${k}?`)) { delete STATE.residents[k]; sync(); } }
+
+        function postAnn() {
+            const t = document.getElementById('ann-in').value;
+            if(!t) return;
+            if(!STATE.announcements) STATE.announcements = [];
+            STATE.announcements.unshift({ id: Date.now(), text: t, date: new Date().toLocaleDateString() });
+            sync(); document.getElementById('ann-in').value = ""; alert("Announcement Posted");
+        }
+
+        function delAnn(id) { STATE.announcements = STATE.announcements.filter(a => a.id !== id); sync(); }
+
+        function postExp() {
+            const t = document.getElementById('exp-title-in').value; const a = Number(document.getElementById('exp-amt-in').value);
+            if(!t || !a) return alert("Error details");
+            if(window.ex_m==='CASH') STATE.cash -= a; else STATE.online -= a;
+            if(!STATE.expenditures) STATE.expenditures = []; STATE.expenditures.unshift({ id: Date.now(), title: t, amt: a, date: new Date().toLocaleDateString(), method: window.ex_m });
+            sync(); showScreen('scr-admin-dash');
+        }
+
+        function pay(mode) {
+            const u = STATE.residents[currentUser]; const curM = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            if(mode==='ONLINE') {
+                STATE.residents[currentUser].lastPaidMonth = curM; STATE.online = (STATE.online||0) + u.fee;
+                if(!u.history) u.history = []; u.history.unshift({ method: "ONLINE", amt: u.fee, date: new Date().toLocaleDateString(), month: curM });
+                showSMS(u.name, currentUser, u.fee, u.ph);
+            } else { STATE.residents[currentUser].requestCash = true; }
+            sync(); document.getElementById('pay-modal').classList.add('hidden');
+        }
+
+        function approve(k) {
+            const r = STATE.residents[k]; const curM = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            STATE.residents[k].requestCash = false; STATE.residents[k].lastPaidMonth = curM; STATE.cash = (STATE.cash||0) + r.fee;
+            if(!r.history) r.history = []; r.history.unshift({ method: "CASH", amt: r.fee, date: new Date().toLocaleDateString(), month: curM });
+            sync(); showSMS(r.name, k, r.fee, r.ph);
+        }
+
+        function updateExBtn() { document.getElementById('em-cash').className = window.ex_m === 'CASH' ? 'flex-1 py-3 rounded-xl border-2 btn-active text-[9px] font-black uppercase' : 'flex-1 py-3 rounded-xl border-2 border-slate-200 text-[9px] font-black uppercase'; document.getElementById('em-bank').className = window.ex_m === 'BANK' ? 'flex-1 py-3 rounded-xl border-2 btn-active text-[9px] font-black uppercase' : 'flex-1 py-3 rounded-xl border-2 border-slate-200 text-[9px] font-black uppercase'; }
+
+        function showReceipt(idx) {
+            const h = STATE.residents[currentUser].history[idx];
+            document.getElementById('r-name').innerText = STATE.residents[currentUser].name;
+            document.getElementById('r-unit').innerText = currentUser;
+            document.getElementById('r-date').innerText = h.date;
+            document.getElementById('r-month').innerText = h.month;
+            document.getElementById('r-amt').innerText = "₹" + h.amt.toLocaleString();
+            document.getElementById('modal-receipt').classList.remove('hidden');
+        }
+
+        function saveProf() { STATE.residents[currentUser].name = document.getElementById('prof-name').value; STATE.residents[currentUser].pass = document.getElementById('prof-pass').value; STATE.residents[currentUser].ph = document.getElementById('prof-phone').value; sync(); alert("Synced to Cloud"); showScreen('scr-res-dash'); }
+
+        function showSMS(name, unit, amt, ph) {
+            document.getElementById('toast-msg').innerText = `SMS DISPATCHED TO ${ph || 'Neighbor'}: Unit ${unit} maintenance verified: ₹${amt}. Thank you - Parimal Complex.`;
+            const t = document.getElementById('toast');
+            t.classList.remove('translate-y-60'); t.classList.add('translate-y-0');
+            setTimeout(() => t.classList.add('translate-y-60'), 6000);
+        }
+    </script>
+</body>
+                  </html>
